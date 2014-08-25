@@ -43,6 +43,10 @@ $ radicast
 $ curl 127.0.0.1:3355/rss # podcast rss
 ```
 
+### RELOAD CONFIG.JSON
+
+* reload config when receive HUP signal
+
 ## SEE ALSO
 
 * [ripdiko](https://github.com/miyagawa/ripdiko)
