@@ -52,6 +52,12 @@ func (r *Radicast) Run() error {
 		return err
 	}
 
+	if _, err := os.Stat(r.output); err != nil {
+		if err := os.MkdirAll(r.output, 0777); err != nil {
+			return err
+		}
+	}
+
 	go func() {
 
 		s := &Server{
