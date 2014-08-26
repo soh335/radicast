@@ -36,6 +36,8 @@ $ cat config.json
 }
 ```
 
+cron specification is [here](https://godoc.org/github.com/robfig/cron#hdr-CRON_Expression_Format)
+
 ### LAUNCH
 
 ```
