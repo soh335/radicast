@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+const (
+	pubDateFormat = "Mon, 2 Jan 2006 15:04:05 -0700"
+)
+
 type PodcastRss struct {
 	XMLName     xml.Name `xml:"rss"`
 	XmlnsItunes string   `xml:"xmlns:itunes,attr,omitempty"`
@@ -74,7 +78,7 @@ type PubDate struct {
 
 func (p PubDate) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	e.EncodeToken(start)
-	e.EncodeToken(xml.CharData(p.String()))
+	e.EncodeToken(xml.CharData(p.Format(pubDateFormat)))
 	e.EncodeToken(xml.EndElement{start.Name})
 	return nil
 }
