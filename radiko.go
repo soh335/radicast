@@ -153,7 +153,7 @@ func (r *Radiko) StationList(ctx context.Context) ([]string, error) {
 		return nil, err
 	}
 
-	progs, err := r.nowPrograms(ctx, area)
+	progs, err := r.todayPrograms(ctx, area)
 	if err != nil {
 		return nil, err
 	}
@@ -167,8 +167,8 @@ func (r *Radiko) StationList(ctx context.Context) ([]string, error) {
 	return stations, nil
 }
 
-func (r *Radiko) nowPrograms(ctx context.Context, area string) (*RadikoPrograms, error) {
-	u, err := url.Parse("http://radiko.jp/v2/api/program/now")
+func (r *Radiko) todayPrograms(ctx context.Context, area string) (*RadikoPrograms, error) {
+	u, err := url.Parse("http://radiko.jp/v2/api/program/today")
 
 	if err != nil {
 		return nil, err
@@ -199,7 +199,7 @@ func (r *Radiko) nowPrograms(ctx context.Context, area string) (*RadikoPrograms,
 }
 
 func (r *Radiko) nowProgram(ctx context.Context, area string, station string) (*RadikoProg, error) {
-	progs, err := r.nowPrograms(ctx, area)
+	progs, err := r.todayPrograms(ctx, area)
 
 	if err != nil {
 		return nil, err
