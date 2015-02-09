@@ -134,11 +134,16 @@ func (r *Radiko) Run(ctx context.Context) (*RadikoResult, error) {
 		errChan <- err
 	}
 
-	go record()
-
 	retry := 0
+	c := make(chan struct{}, 1)
+
+	c <- struct{}{}
+
 	for {
 		select {
+		case <-c:
+			r.Log("start record")
+			go record()
 		case <-ctx.Done():
 			err := <-errChan
 			if err == nil {
@@ -155,7 +160,7 @@ func (r *Radiko) Run(ctx context.Context) (*RadikoResult, error) {
 			if retry < 5 {
 				sec := time.Second * 10
 				time.AfterFunc(sec, func() {
-					record()
+					c <- struct{}{}
 				})
 				r.Log("retry after", sec)
 				retry++
