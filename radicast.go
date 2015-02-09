@@ -7,8 +7,8 @@ import (
 	"os"
 	"sync"
 
-	"code.google.com/p/go.net/context"
 	"github.com/robfig/cron"
+	"golang.org/x/net/context"
 )
 
 type Radicast struct {
