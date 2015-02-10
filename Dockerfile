@@ -1,4 +1,4 @@
-FROM dockerfile/ubuntu
+FROM ubuntu:trusty
 MAINTAINER soh335
 
 RUN echo "Asia/Tokyo\n" > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
