@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
         libav-tools \
         rtmpdump \
         swftools \
-        jq \
         git
 
 # http://blog.gopheracademy.com/advent-2014/easy-deployment/
