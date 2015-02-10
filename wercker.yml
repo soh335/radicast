@@ -7,6 +7,12 @@ build:
     # at the right place in the workspace tree
     - setup-go-workspace
 
+    - script:
+        name: install mitchellh/gox
+        code: |
+          go get -u -v github.com/mitchellh/gox
+          sudo -E env PATH=$GOPATH/bin:$PATH gox -build-toolchain
+
     # Gets the dependencies
     - script:
         name: go get
@@ -27,3 +33,7 @@ build:
         code: |
           go test ./...
 
+    # gox
+    - tcnksm/gox:
+        os: "darwin linux"
+        arch: "386 amd64"
