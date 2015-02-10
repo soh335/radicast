@@ -26,9 +26,10 @@ type Radicast struct {
 	output     string
 	bitrate    string
 	buffer     int64
+	converter  string
 }
 
-func NewRadicast(path string, host string, port string, title string, output string, bitrate string, buffer int64) *Radicast {
+func NewRadicast(path string, host string, port string, title string, output string, bitrate string, buffer int64, converter string) *Radicast {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	r := &Radicast{
@@ -43,6 +44,7 @@ func NewRadicast(path string, host string, port string, title string, output str
 		output:     output,
 		bitrate:    bitrate,
 		buffer:     buffer,
+		converter:  converter,
 	}
 	return r
 }
@@ -119,9 +121,10 @@ func (r *Radicast) ReloadConfig() error {
 					defer r.wg.Done()
 
 					radiko := &Radiko{
-						Station: station,
-						Bitrate: r.bitrate,
-						Buffer:  r.buffer,
+						Station:   station,
+						Bitrate:   r.bitrate,
+						Buffer:    r.buffer,
+						Converter: r.converter,
 					}
 
 					ret, err := radiko.Run(r.ctx)
