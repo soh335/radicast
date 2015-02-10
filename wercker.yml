@@ -1,4 +1,4 @@
-box: wercker/golang
+box: tcnksm/gox@0.2.0
 # Build definition
 build:
   # The steps that will be executed on build
@@ -6,12 +6,6 @@ build:
     # Sets the go workspace and places you package
     # at the right place in the workspace tree
     - setup-go-workspace
-
-    - script:
-        name: install mitchellh/gox
-        code: |
-          go get -u -v github.com/mitchellh/gox
-          sudo -E env PATH=$GOPATH/bin:$PATH gox -build-toolchain
 
     # Gets the dependencies
     - script:
