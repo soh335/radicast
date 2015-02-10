@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
         rtmpdump \
         swftools
 
-RUN curl -LO https://github.com/soh335/radicast/releases/download/pre-release/linux_amd64.zip
+RUN curl -LO https://github.com/soh335/radicast/releases/download/0.0.1/linux_amd64.zip
 RUN unzip linux_amd64.zip
 RUN mv radicast /usr/local/bin/
 
