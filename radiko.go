@@ -129,22 +129,46 @@ func (r *Radiko) Run(ctx context.Context) (*RadikoResult, error) {
 	errChan := make(chan error)
 	var ret *RadikoResult
 
-	go func() {
+	record := func() {
 		var err error
 		ret, err = r.record(ctx, r.Station, r.Bitrate, r.Buffer)
 		errChan <- err
-	}()
+	}
 
-	select {
-	case <-ctx.Done():
-		err := <-errChan
-		if err == nil {
-			err = ctx.Err()
+	retry := 0
+	c := make(chan struct{}, 1)
+
+	c <- struct{}{}
+
+	for {
+		select {
+		case <-c:
+			r.Log("start record")
+			go record()
+		case <-ctx.Done():
+			err := <-errChan
+			if err == nil {
+				err = ctx.Err()
+			}
+			return nil, err
+		case err := <-errChan:
+			r.Log("finished")
+			if err == nil {
+				return ret, err
+			}
+
+			r.Log("got err:", err)
+			if retry < 5 {
+				sec := time.Second * 10
+				time.AfterFunc(sec, func() {
+					c <- struct{}{}
+				})
+				r.Log("retry after ", sec)
+				retry++
+			} else {
+				return ret, err
+			}
 		}
-		return nil, err
-	case err := <-errChan:
-		r.Log("finished")
-		return ret, err
 	}
 }
 
@@ -191,10 +215,19 @@ func (r *Radiko) todayPrograms(ctx context.Context, area string) (*RadikoProgram
 		if err != nil {
 			return err
 		}
+
+		if code := resp.StatusCode; code != 200 {
+			return fmt.Errorf("not status code:200, got:%d", code)
+		}
+
 		defer resp.Body.Close()
 
 		return xml.NewDecoder(resp.Body).Decode(&progs)
 	})
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &progs, nil
 }
