@@ -9,6 +9,7 @@
 * rtmpdump
 * swftools
 * ffmpeg or avconv
+* or docker (see docker section)
 
 ## INSTALL
 
@@ -49,6 +50,16 @@ $ curl 127.0.0.1:3355/rss # podcast rss
 ### RELOAD CONFIG.JSON
 
 * reload config when receive HUP signal
+
+## DOCKER
+
+```
+$ cd app
+$ mkdir output
+$ # create config.json
+$ docker pull soh335/radicast
+$ docker run -p 3355:3355 -it --rm -v <path/to/app>:</dir> <name> --config </dir>/config.json --output </dir>/output
+```
 
 ## SEE ALSO
 
