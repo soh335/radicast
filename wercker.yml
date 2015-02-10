@@ -42,7 +42,3 @@ deploy:
         token: $GITHUB_TOKEN
         input: dist
         replace: true
-
-    - soh335/docker-hub-build-trigger:
-        token: $DOCKER_HUB_BUILD_TRIGGER_TOKEN
-        repo: soh335/radicast
