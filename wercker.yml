@@ -41,8 +41,4 @@ deploy:
     - tcnksm/ghr:
         token: $GITHUB_TOKEN
         input: dist
-        version: 0.0.1
-
-    - soh335/docker-hub-build-trigger:
-        token: $DOCKER_HUB_BUILD_TRIGGER_TOKEN
-        repo: soh335/radicast
+        replace: true
