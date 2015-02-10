@@ -8,7 +8,7 @@
 
 * rtmpdump
 * swftools
-* ffmpeg
+* ffmpeg or avconv
 
 ## INSTALL
 

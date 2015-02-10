@@ -119,9 +119,10 @@ func (r *RadikoResult) Log(v ...interface{}) {
 }
 
 type Radiko struct {
-	Station string
-	Bitrate string
-	Buffer  int64
+	Station   string
+	Bitrate   string
+	Buffer    int64
+	Converter string
 }
 
 func (r *Radiko) Run(ctx context.Context) (*RadikoResult, error) {
@@ -300,12 +301,6 @@ func (r *Radiko) download(ctx context.Context, authtoken string, station string,
 		return err
 	}
 
-	ffmpeg, err := exec.LookPath("ffmpeg")
-
-	if err != nil {
-		return err
-	}
-
 	rtmpdumpCmd := exec.Command(rtmpdump,
 		"--live",
 		"--quiet",
@@ -318,20 +313,23 @@ func (r *Radiko) download(ctx context.Context, authtoken string, station string,
 		"-o", "-",
 	)
 
-	ffmpegCmd := exec.Command(
-		ffmpeg,
-		"-y",
-		"-i", "-",
-		"-vn",
-		"-acodec", "libmp3lame",
-		"-ar", "44100",
-		"-ab", bitrate,
-		"-ac", "2",
-		output,
-	)
+	converter := r.Converter
+	if r.Converter == "" {
+		cmd, err := lookConverterCommand()
+		if err != nil {
+			return err
+		}
+		converter = cmd
+	}
+
+	converterCmd, err := newConverterCmd(converter, bitrate, output)
+
+	if err != nil {
+		return err
+	}
 
 	r.Log("rtmpdump command: ", strings.Join(rtmpdumpCmd.Args, " "))
-	r.Log("ffmpeg command: ", strings.Join(ffmpegCmd.Args, " "))
+	r.Log("converter command: ", strings.Join(converterCmd.Args, " "))
 
 	pipe, err := rtmpdumpCmd.StdoutPipe()
 
@@ -339,12 +337,12 @@ func (r *Radiko) download(ctx context.Context, authtoken string, station string,
 		return err
 	}
 
-	ffmpegCmd.Stdin = pipe
+	converterCmd.Stdin = pipe
 
 	errChan := make(chan error)
 	go func() {
 
-		if err := ffmpegCmd.Start(); err != nil {
+		if err := converterCmd.Start(); err != nil {
 			errChan <- err
 			return
 		}
@@ -354,7 +352,7 @@ func (r *Radiko) download(ctx context.Context, authtoken string, station string,
 			return
 		}
 
-		if err := ffmpegCmd.Wait(); err != nil {
+		if err := converterCmd.Wait(); err != nil {
 			errChan <- err
 			return
 		}

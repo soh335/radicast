@@ -19,6 +19,7 @@ var (
 	title      = flag.String("title", "radicast", "title")
 	configPath = flag.String("config", "config.json", "path of config.json")
 	setup      = flag.Bool("setup", false, "initialize json configuration")
+	converter  = flag.String("converter", "", "ffmpeg or avconv. If not set this option, radicast search its automatically.")
 )
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 }
 
 func runRadicast() {
-	r := NewRadicast(*configPath, *host, *port, *title, *output, *bitrate, *buffer)
+	r := NewRadicast(*configPath, *host, *port, *title, *output, *bitrate, *buffer, *converter)
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, os.Kill, syscall.SIGHUP)
