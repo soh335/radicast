@@ -162,7 +162,7 @@ func (r *Radiko) Run(ctx context.Context) (*RadikoResult, error) {
 				time.AfterFunc(sec, func() {
 					c <- struct{}{}
 				})
-				r.Log("retry after", sec)
+				r.Log("retry after ", sec)
 				retry++
 			} else {
 				return ret, err
