@@ -54,11 +54,10 @@ $ curl 127.0.0.1:3355/rss # podcast rss
 ## DOCKER
 
 ```
-$ mkdir app
 $ cd app
 $ mkdir output
 $ # create config.json
-$ docker build -t <name> </path/to/repo/>
+$ docker pull soh335/radicast
 $ docker run -p 3355:3355 -it --rm -v <path/to/app>:</dir> <name> --config </dir>/config.json --output </dir>/output
 ```
 
