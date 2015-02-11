@@ -22,7 +22,7 @@ $ go get github.com/soh335/radicast
 ### SETUP CONFIG.JSON
 
 ```
-$ radicast --setup # create config.json
+$ radicast --setup > config.json
 ```
 
 ### EDIT CONFIG.JSON
@@ -54,11 +54,11 @@ $ curl 127.0.0.1:3355/rss # podcast rss
 ## DOCKER
 
 ```
-$ cd app
-$ mkdir output
-$ # create config.json
+$ mkdir -p workspace/output
+$ cd workspace
 $ docker pull soh335/radicast
-$ docker run -p 3355:3355 -it --rm -v <path/to/app>:</dir> <name> --config </dir>/config.json --output </dir>/output
+$ docker run -it --rm soh335/radicast:latest --setup > config.json
+$ docker run -p 3355:3355 -it --rm -v <path/to/workspace>:/ soh335/radicast:latest --config /config.json --output /output
 ```
 
 ## SEE ALSO

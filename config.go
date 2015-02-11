@@ -26,12 +26,7 @@ func LoadConfig(path string) (Config, error) {
 	return c, nil
 }
 
-func SetupConfig(ctx context.Context, path string) error {
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
-
-	if err != nil {
-		return err
-	}
+func SetupConfig(ctx context.Context) error {
 
 	r := &Radiko{}
 	stations, err := r.StationList(ctx)
@@ -50,7 +45,7 @@ func SetupConfig(ctx context.Context, path string) error {
 		return err
 	}
 
-	if _, err := io.Copy(f, bytes.NewReader(byt)); err != nil {
+	if _, err := io.Copy(os.Stdout, bytes.NewReader(byt)); err != nil {
 		return err
 	}
 

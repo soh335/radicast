@@ -69,7 +69,7 @@ func runSetup() {
 		cancel()
 	}()
 
-	if err := SetupConfig(ctx, *configPath); err != nil {
+	if err := SetupConfig(ctx); err != nil {
 		log.Fatal(err)
 	}
 	return
