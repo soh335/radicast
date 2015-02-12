@@ -54,7 +54,7 @@ $ curl 127.0.0.1:3355/rss # podcast rss
 ## DOCKER
 
 ```
-$ mkdir -p workspace/output
+$ mkdir workspace
 $ cd workspace
 $ docker pull soh335/radicast
 $ docker run --rm soh335/radicast:latest --setup > config.json
