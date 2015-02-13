@@ -91,7 +91,7 @@ func (r *RadikoResult) Save(dir string) error {
 	mp3Path := filepath.Join(programDir, "podcast.mp3")
 	xmlPath := filepath.Join(programDir, "podcast.xml")
 
-	if err := os.Rename(r.Mp3Path, mp3Path); err != nil {
+	if err := RenameOrCopy(r.Mp3Path, mp3Path); err != nil {
 		return err
 	}
 
@@ -319,7 +319,7 @@ func (r *Radiko) tmpOutputMp3Path() (string, error) {
 
 	outputRenamed := output.Name() + ".mp3"
 
-	if err := os.Rename(output.Name(), outputRenamed); err != nil {
+	if err := RenameOrCopy(output.Name(), outputRenamed); err != nil {
 		return "", err
 	}
 
