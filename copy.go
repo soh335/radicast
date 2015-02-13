@@ -6,7 +6,7 @@ import (
 )
 
 func RenameOrCopy(oldpath, newpath string) error {
-	// failed if oldpath and newpath are not same file system.
+	// failed if oldpath and newpath are not at same file system.
 	if err := os.Rename(oldpath, newpath); err == nil {
 		return nil
 	}
