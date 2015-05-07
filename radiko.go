@@ -583,15 +583,13 @@ func (r *Radiko) Log(v ...interface{}) {
 func (r *Radiko) httpDo(ctx context.Context, req *http.Request, f func(*http.Response, error) error) error {
 	r.Log(req.Method + " " + req.URL.String())
 
-	tr := &http.Transport{}
-	client := &http.Client{Transport: tr}
 	errChan := make(chan error)
 
-	go func() { errChan <- f(client.Do(req)) }()
+	go func() { errChan <- f(http.DefaultClient.Do(req)) }()
 
 	select {
 	case <-ctx.Done():
-		tr.CancelRequest(req)
+		http.DefaultClient.Transport.(*http.Transport).CancelRequest(req)
 		err := <-errChan
 		if err == nil {
 			err = ctx.Err()
