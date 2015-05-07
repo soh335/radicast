@@ -216,11 +216,11 @@ func (r *Radiko) todayPrograms(ctx context.Context, area string) (*RadikoProgram
 			return err
 		}
 
+		defer resp.Body.Close()
+
 		if code := resp.StatusCode; code != 200 {
 			return fmt.Errorf("not status code:200, got:%d", code)
 		}
-
-		defer resp.Body.Close()
 
 		return xml.NewDecoder(resp.Body).Decode(&progs)
 	})
@@ -486,6 +486,8 @@ func (r *Radiko) auth(ctx context.Context) (string, string, error) {
 		if err != nil {
 			return err
 		}
+
+		defer resp.Body.Close()
 
 		authtoken = resp.Header.Get("X-Radiko-Authtoken")
 		keylength := resp.Header.Get("X-Radiko-Keylength")
