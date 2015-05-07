@@ -591,7 +591,7 @@ func (r *Radiko) httpDo(ctx context.Context, req *http.Request, f func(*http.Res
 
 	select {
 	case <-ctx.Done():
-		http.DefaultClient.Transport.(*http.Transport).CancelRequest(req)
+		http.DefaultTransport.(*http.Transport).CancelRequest(req)
 		err := <-errChan
 		if err == nil {
 			err = ctx.Err()
