@@ -1,44 +1,31 @@
-box: tcnksm/gox@0.2.0
+# use the official google golang container
+
+box: google/golang
+
 # Build definition
 build:
   # The steps that will be executed on build
   steps:
+
     # Sets the go workspace and places you package
     # at the right place in the workspace tree
     - setup-go-workspace
 
-    # Gets the dependencies
-    - script:
-        name: go get
-        code: |
-          cd $WERCKER_SOURCE_DIR
-          go version
-          go get -t ./...
+    # golint step!
+    # - wercker/golint
 
+    # Build the project
+    - script:
+        name: go get -t
+        code: |
+          go get -t -v ./...
     # Build the project
     - script:
         name: go build
         code: |
-          go build ./...
-
+          go build -v ./...
     # Test the project
     - script:
         name: go test
         code: |
-          go test ./...
-
-    - tcnksm/gox:
-        os: "darwin linux"
-        arch: "386 amd64"
-        ldflags: -X main.GitCommit "$(git describe --always)"
-
-    - tcnksm/zip:
-        input: ${WERCKER_OUTPUT_DIR}/pkg
-        output: ${WERCKER_OUTPUT_DIR}/dist
-
-deploy:
-  steps:
-    # - tcnksm/ghr:
-    #     token: $GITHUB_TOKEN
-    #     input: dist
-    #     replace: true
+          go test -v ./...
