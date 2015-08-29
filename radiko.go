@@ -227,9 +227,9 @@ func (r *Radiko) ConcatOutput(dir string, results []*RadikoResult) (*RadikoResul
 	}
 
 	cmd := exec.Command(r.Converter, args...)
+	r.Log("concat cmd:", strings.Join(cmd.Args, " "))
 
 	if err := cmd.Run(); err != nil {
-		r.Log("failed cmd:", strings.Join(cmd.Args, " "))
 		return nil, err
 	}
 
