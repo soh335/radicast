@@ -30,10 +30,21 @@ func main() {
 		return
 	}
 
-	runRadicast()
+	if err := runRadicast(); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func runRadicast() {
+func runRadicast() error {
+
+	if *converter == "" {
+		cmd, err := lookConverterCommand()
+		if err != nil {
+			return err
+		}
+		*converter = cmd
+	}
+
 	r := NewRadicast(*configPath, *host, *port, *title, *output, *bitrate, *buffer, *converter)
 
 	signalChan := make(chan os.Signal, 1)
@@ -52,9 +63,7 @@ func runRadicast() {
 		}
 	}()
 
-	if err := r.Run(); err != nil {
-		log.Fatal(err)
-	}
+	return r.Run()
 }
 
 func runSetup() {

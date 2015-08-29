@@ -123,20 +123,49 @@ type Radiko struct {
 	Bitrate   string
 	Buffer    int64
 	Converter string
+	TempDir   string
+	Result    *RadikoResult
 }
 
-func (r *Radiko) Run(ctx context.Context) (*RadikoResult, error) {
-	errChan := make(chan error)
-	var ret *RadikoResult
+func (r *Radiko) Run(ctx context.Context) error {
 
-	record := func() {
-		var err error
-		ret, err = r.record(ctx, r.Station, r.Bitrate, r.Buffer)
-		errChan <- err
+	results := r.run(ctx)
+
+	switch len(results) {
+	case 0:
+		return fmt.Errorf("empty outputs")
+	case 1:
+		r.Result = results[0]
+		return nil
+	default:
+		result, err := r.ConcatOutput(r.TempDir, results)
+		if err != nil {
+			return err
+		}
+		r.Result = result
+		return nil
 	}
+}
+
+func (r *Radiko) run(ctx context.Context) []*RadikoResult {
+	errChan := make(chan error)
 
 	retry := 0
 	c := make(chan struct{}, 1)
+
+	results := []*RadikoResult{}
+
+	record := func() error {
+		output := filepath.Join(r.TempDir, fmt.Sprintf("radiko_%d.mp3", retry))
+
+		ret, err := r.record(ctx, output, r.Station, r.Bitrate, r.Buffer)
+
+		if ret != nil {
+			results = append(results, ret)
+		}
+
+		return err
+	}
 
 	c <- struct{}{}
 
@@ -144,17 +173,25 @@ func (r *Radiko) Run(ctx context.Context) (*RadikoResult, error) {
 		select {
 		case <-c:
 			r.Log("start record")
-			go record()
+			go func() {
+				errChan <- record()
+			}()
 		case <-ctx.Done():
-			err := <-errChan
-			if err == nil {
-				err = ctx.Err()
+			if err := ctx.Err(); err != nil {
+				r.Log("context err:", err)
 			}
-			return nil, err
+
+			select {
+			case err := <-errChan:
+				r.Log("err:", err)
+			case <-time.After(time.Second * 10):
+				r.Log("timeout receive err chan")
+			}
+			return results
 		case err := <-errChan:
 			r.Log("finished")
 			if err == nil {
-				return ret, err
+				return results
 			}
 
 			r.Log("got err:", err)
@@ -166,10 +203,41 @@ func (r *Radiko) Run(ctx context.Context) (*RadikoResult, error) {
 				r.Log("retry after ", sec)
 				retry++
 			} else {
-				return ret, err
+				return results
 			}
 		}
 	}
+}
+
+// http://superuser.com/questions/314239/how-to-join-merge-many-mp3-files
+func (r *Radiko) ConcatOutput(dir string, results []*RadikoResult) (*RadikoResult, error) {
+	output := filepath.Join(dir, "radiko_concat.mp3")
+
+	outputs := []string{}
+	for _, result := range results {
+		outputs = append(outputs, result.Mp3Path)
+	}
+
+	args := []string{
+		"-i",
+		fmt.Sprintf("concat:%s", strings.Join(outputs, "|")),
+		"-acodec",
+		"copy",
+		output,
+	}
+
+	cmd := exec.Command(r.Converter, args...)
+	r.Log("concat cmd:", strings.Join(cmd.Args, " "))
+
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+
+	return &RadikoResult{
+		Mp3Path: output,
+		Station: results[0].Station,
+		Prog:    results[0].Prog,
+	}, nil
 }
 
 func (r *Radiko) StationList(ctx context.Context) ([]string, error) {
@@ -264,7 +332,7 @@ func (r *Radiko) nowProgram(ctx context.Context, area string, station string) (*
 	return nil, errors.New("not found program")
 }
 
-func (r *Radiko) record(ctx context.Context, station string, bitrate string, buffer int64) (*RadikoResult, error) {
+func (r *Radiko) record(ctx context.Context, output string, station string, bitrate string, buffer int64) (*RadikoResult, error) {
 
 	authtoken, area, err := r.auth(ctx)
 
@@ -288,14 +356,9 @@ func (r *Radiko) record(ctx context.Context, station string, bitrate string, buf
 
 	duration += buffer
 
-	output, err := r.tmpOutputMp3Path()
+	err = r.download(ctx, authtoken, station, fmt.Sprint(duration), bitrate, output)
 
-	if err != nil {
-		return nil, err
-	}
-
-	if err := r.download(ctx, authtoken, station, fmt.Sprint(duration), bitrate, output); err != nil {
-		os.Remove(output)
+	if _, fileErr := os.Stat(output); fileErr != nil {
 		return nil, err
 	}
 
@@ -305,25 +368,7 @@ func (r *Radiko) record(ctx context.Context, station string, bitrate string, buf
 		Prog:    prog,
 	}
 
-	return ret, nil
-}
-
-func (r *Radiko) tmpOutputMp3Path() (string, error) {
-	output, err := ioutil.TempFile("", "radiko")
-
-	if err != nil {
-		return "", err
-	}
-
-	defer output.Close()
-
-	outputRenamed := output.Name() + ".mp3"
-
-	if err := RenameOrCopy(output.Name(), outputRenamed); err != nil {
-		return "", err
-	}
-
-	return outputRenamed, nil
+	return ret, err
 }
 
 func (r *Radiko) download(ctx context.Context, authtoken string, station string, sec string, bitrate string, output string) error {
@@ -346,16 +391,7 @@ func (r *Radiko) download(ctx context.Context, authtoken string, station string,
 		"-o", "-",
 	)
 
-	converter := r.Converter
-	if r.Converter == "" {
-		cmd, err := lookConverterCommand()
-		if err != nil {
-			return err
-		}
-		converter = cmd
-	}
-
-	converterCmd, err := newConverterCmd(converter, bitrate, output)
+	converterCmd, err := newConverterCmd(r.Converter, bitrate, output)
 
 	if err != nil {
 		return err
