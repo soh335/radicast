@@ -226,7 +226,7 @@ func (r *Radiko) ConcatOutput(dir string, results []*RadikoResult) (*RadikoResul
 		output,
 	}
 
-	cmd := exec.Command("ffmpeg", args...)
+	cmd := exec.Command(r.Converter, args...)
 
 	if err := cmd.Run(); err != nil {
 		r.Log("failed cmd:", strings.Join(cmd.Args, " "))
@@ -391,16 +391,7 @@ func (r *Radiko) download(ctx context.Context, authtoken string, station string,
 		"-o", "-",
 	)
 
-	converter := r.Converter
-	if r.Converter == "" {
-		cmd, err := lookConverterCommand()
-		if err != nil {
-			return err
-		}
-		converter = cmd
-	}
-
-	converterCmd, err := newConverterCmd(converter, bitrate, output)
+	converterCmd, err := newConverterCmd(r.Converter, bitrate, output)
 
 	if err != nil {
 		return err
