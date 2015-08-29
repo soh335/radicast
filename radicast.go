@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -13,7 +14,7 @@ import (
 
 type Radicast struct {
 	reloadChan chan struct{}
-	saveChan   chan *RadikoResult
+	saveChan   chan *Radiko
 	configPath string
 	cron       *cron.Cron
 	m          sync.Mutex
@@ -34,7 +35,7 @@ func NewRadicast(path string, host string, port string, title string, output str
 
 	r := &Radicast{
 		reloadChan: make(chan struct{}),
-		saveChan:   make(chan *RadikoResult),
+		saveChan:   make(chan *Radiko),
 		configPath: path,
 		ctx:        ctx,
 		cancel:     cancel,
@@ -82,13 +83,14 @@ func (r *Radicast) Run() error {
 			if err := r.ReloadConfig(); err != nil {
 				r.Log(err)
 			}
-		case ret := <-r.saveChan:
-			if err := ret.Save(r.output); err != nil {
-				r.Log(err)
-				if err := os.Remove(ret.Mp3Path); err != nil {
+		// if same program is recorded, write files as parallely and may occure error. so write file as serially by channel.
+		case radiko := <-r.saveChan:
+			func() {
+				defer os.RemoveAll(radiko.TempDir)
+				if err := radiko.Result.Save(r.output); err != nil {
 					r.Log(err)
 				}
-			}
+			}()
 		}
 	}
 }
@@ -120,22 +122,27 @@ func (r *Radicast) ReloadConfig() error {
 					r.wg.Add(1)
 					defer r.wg.Done()
 
-					radiko := &Radiko{
-						Station:   station,
-						Bitrate:   r.bitrate,
-						Buffer:    r.buffer,
-						Converter: r.converter,
-					}
-
-					ret, err := radiko.Run(r.ctx)
+					dir, err := ioutil.TempDir("", "radiko")
 					if err != nil {
 						r.Log(err)
 						return
 					}
 
-					if ret != nil {
-						r.saveChan <- ret
+					radiko := &Radiko{
+						Station:   station,
+						Bitrate:   r.bitrate,
+						Buffer:    r.buffer,
+						Converter: r.converter,
+						TempDir:   dir,
 					}
+
+					if err := radiko.Run(r.ctx); err != nil {
+						os.RemoveAll(radiko.TempDir)
+						r.Log(err)
+						return
+					}
+
+					r.saveChan <- radiko
 				})
 			}(station, spec)
 		}
