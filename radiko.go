@@ -194,6 +194,7 @@ func (r *Radiko) run(ctx context.Context) []*RadikoResult {
 				return results
 			}
 
+			// TODO stop if recod program is changed.
 			r.Log("got err:", err)
 			if retry < 5 {
 				sec := time.Second * 10
