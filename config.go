@@ -2,11 +2,10 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"os"
-
-	"golang.org/x/net/context"
 )
 
 type Config map[string][]string

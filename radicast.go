@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/robfig/cron"
-	"golang.org/x/net/context"
 )
 
 type Radicast struct {

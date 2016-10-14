@@ -1,13 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"golang.org/x/net/context"
 )
 
 var (

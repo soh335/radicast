@@ -6,6 +6,7 @@ package main
 // https://gist.github.com/saiten/875864
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/xml"
 	"errors"
@@ -22,8 +23,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 const (
