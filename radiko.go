@@ -26,7 +26,7 @@ import (
 
 const (
 	radikoTimeLayout = "20060102150405"
-	playerUrl        = "http://radiko.jp/player/swf/player_3.0.0.01.swf"
+	playerUrl        = "http://radiko.jp/apps/js/flash/myplayer-release.swf"
 )
 
 type RadikoPrograms struct {
@@ -499,7 +499,7 @@ func (r *Radiko) auth(ctx context.Context) (string, string, error) {
 		os.Remove(tmpAuthKeyPngFile.Name())
 	}()
 
-	swfextractCmd := exec.Command(swfextract, "-b", "14", tmpSwfFile.Name(), "-o", tmpAuthKeyPngFile.Name())
+	swfextractCmd := exec.Command(swfextract, "-b", "12", tmpSwfFile.Name(), "-o", tmpAuthKeyPngFile.Name())
 	if err := swfextractCmd.Run(); err != nil {
 		return "", "", err
 	}
@@ -511,8 +511,8 @@ func (r *Radiko) auth(ctx context.Context) (string, string, error) {
 	}
 
 	req.Header.Set("pragma", "no-cache")
-	req.Header.Set("X-Radiko-App", "pc_1")
-	req.Header.Set("X-Radiko-App-Version", "2.0.1")
+	req.Header.Set("X-Radiko-App", "pc_ts")
+	req.Header.Set("X-Radiko-App-Version", "4.0.0")
 	req.Header.Set("X-Radiko-User", "test-stream")
 	req.Header.Set("X-Radiko-Device", "pc")
 
@@ -575,8 +575,8 @@ func (r *Radiko) auth(ctx context.Context) (string, string, error) {
 	}
 
 	req.Header.Set("pragma", "no-cache")
-	req.Header.Set("X-Radiko-App", "pc_1")
-	req.Header.Set("X-Radiko-App-Version", "2.0.1")
+	req.Header.Set("X-Radiko-App", "pc_ts")
+	req.Header.Set("X-Radiko-App-Version", "4.0.0")
 	req.Header.Set("X-Radiko-User", "test-stream")
 	req.Header.Set("X-Radiko-Device", "pc")
 	req.Header.Set("X-Radiko-Authtoken", authtoken)
