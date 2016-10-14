@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
         git
 
 # http://blog.gopheracademy.com/advent-2014/easy-deployment/
-RUN mkdir /goroot && curl https://storage.googleapis.com/golang/go1.4.1.linux-amd64.tar.gz | tar xvzf - -C /goroot --strip-components=1
+RUN mkdir /goroot && curl https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz | tar xvzf - -C /goroot --strip-components=1
 
 ENV GOROOT /goroot
 ENV GOPATH /gopath
