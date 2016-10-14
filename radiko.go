@@ -1,7 +1,9 @@
 package main
 
 // api for radiko, rtmpdump and ffmpeg command parameter
-// are taken from https://github.com/miyagawa/ripdiko
+// are taken from
+// https://github.com/miyagawa/ripdiko
+// https://gist.github.com/saiten/875864
 
 import (
 	"encoding/base64"
