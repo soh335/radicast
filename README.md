@@ -66,3 +66,7 @@ $ docker run --rm -p 3355:3355 -v `pwd`:/workspace soh335/radicast:latest --conf
 ## SEE ALSO
 
 * [ripdiko](https://github.com/miyagawa/ripdiko)
+
+## LICENSE
+
+* MIT
